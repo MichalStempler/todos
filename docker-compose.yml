@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    image: 'todos-application:latest'
+    build:
+      context: .
+    container_name: todos-application-service
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_USER=$YOUR_USERNAME
+      - POSTGRES_PASSWORD=$YOUR_PASSWORD
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=$YOUR_USERNAME
+      - SPRING_DATASOURCE_PASSWORD=$YOUR_PASSWORD
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+
+    ports:
+      - "$LOCAL_APP_PORT:$DOCKER_APP_PORT"
+
+  db:
+    image: postgres
+    container_name: db
+    environment:
+      - POSTGRES_USER=$YOUR_USERNAME
+      - POSTGRES_PASSWORD=$YOUR_PASSWORD
+      - POSTGRES_DB=postgres
+    ports:
+      - "$LOCAL_DB_PORT:$DOCKER_DB_PORT"
