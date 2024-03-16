@@ -5,7 +5,6 @@ import com.edwards.todosapp.error.InvalidIdException;
 import com.edwards.todosapp.model.ToDo;
 import com.edwards.todosapp.model.TodoStatusEnum;
 import com.edwards.todosapp.service.TodoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +49,7 @@ public class ToDoControllerTest {
         when(toDoService.getAllToDos()).thenReturn(todos);
         when(toDoService.findToDoById(anyLong())).thenReturn(todos.stream().filter(t -> t.getId()==1).findAny().orElse(null));
         when(toDoService.updateStatus(2, TodoStatusEnum.IN_PROCESS)).thenReturn(updatedEntity());
+        when(toDoService.updateEntity(any())).thenReturn(updatedEntity());
 
     }
 
@@ -92,6 +92,19 @@ public class ToDoControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+    }
+
+    @Test
+    public void updateEntity() throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/todos-api/update")
+                        .content(jsonUpdateStatus)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().string(jsonUpdateStatus))
+                .andReturn();
+
+        assertNotNull(result);
+        assertEquals(jsonUpdateStatus, result.getResponse().getContentAsString());
     }
 
     @Test

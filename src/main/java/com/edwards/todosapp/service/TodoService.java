@@ -1,22 +1,19 @@
 package com.edwards.todosapp.service;
 
-import com.edwards.todosapp.controller.LoggingController;
 import com.edwards.todosapp.dao.TodoRepository;
 import com.edwards.todosapp.error.InvalidIdException;
 import com.edwards.todosapp.model.ToDo;
 import com.edwards.todosapp.model.TodoStatusEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class TodoService {
-
-    Logger logger = LoggerFactory.getLogger(LoggingController.class);
     @Autowired
     private TodoRepository repository;
 
@@ -28,12 +25,12 @@ public class TodoService {
         return repository.saveAll(newItems);
     }
 
-    @CachePut(value="todos")
+    @Cacheable("todos")
     public List<ToDo> getAllToDos() {
         return repository.findAll();
     }
 
-    @CachePut(value="todos")
+    @Cacheable("todos")
     public ToDo findToDoById(long id) throws InvalidIdException {
         return repository.findById(id).orElseThrow(InvalidIdException::new);
     }
@@ -42,16 +39,21 @@ public class TodoService {
         if (repository.existsById(id)) {
             repository.deleteById(id);
         } else {
-            logger.error("Id is not valid, try something else.");
+            log.error("Id is not valid, try something else.");
             throw new InvalidIdException();
         }
     }
 
     public ToDo updateStatus(long id, TodoStatusEnum statusEnum) {
         ToDo currentItem = findToDoById(id);
-
         currentItem.setStatus(statusEnum);
-        logger.debug("Status for item:" + id + " is updated to " + statusEnum.toString());
+
+        log.debug("Status for item:{} is updated to {}", id, statusEnum);
         return repository.save(currentItem);
+    }
+
+    public ToDo updateEntity(ToDo newItem) {
+        log.debug("Item with id:{} is updated.", newItem.getId());
+        return repository.save(newItem);
     }
 }

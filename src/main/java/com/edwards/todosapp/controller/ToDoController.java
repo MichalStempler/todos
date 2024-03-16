@@ -47,10 +47,15 @@ public class ToDoController {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(method = RequestMethod.PUT, path = "/update")
+    public ToDo updateEntity(@RequestBody ToDo newItem) {
+        return service.updateEntity(newItem);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.PUT, path = "/delete/{id}")
     public void deleteToDo(@PathVariable long id) {
         service.deleteToDoById(id);
     }
-
 
 }
