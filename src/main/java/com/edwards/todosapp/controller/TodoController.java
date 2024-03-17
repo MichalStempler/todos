@@ -11,51 +11,45 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("todos-api")
-public class ToDoController {
+@RequestMapping("todos")
+public class TodoController {
     @Autowired
-    TodoService service;
+    TodoService todoService;
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, path = "/create")
     public ToDo createTodo(@RequestBody ToDo newItem) {
-        return service.save(newItem);
+        return todoService.save(newItem);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, path = "/create-list")
     public List<ToDo> createTodosList(@RequestBody List<ToDo> newItems) {
-        return service.saveList(newItems);
+        return todoService.saveList(newItems);
     }
 
     @ResponseStatus(code = HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.GET, value = "/all")
+    @RequestMapping(method = RequestMethod.GET, value = "/")
     public List<ToDo> getAllTodos() {
-        return service.getAllToDos();
+        return todoService.getAllToDos();
     }
 
     @ResponseStatus(code = HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.GET, value = "/id/{id}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     public ToDo getToDoById(@PathVariable long id) throws InvalidIdException {
-        return service.findToDoById(id);
+        return todoService.findToDoById(id);
     }
 
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @RequestMapping(method = RequestMethod.PUT, path = "/update/status/{id}/{status}")
     public ToDo updateStatus(@PathVariable("id") long id,@PathVariable("status") String status) {
-        return service.updateStatus(id, TodoStatusEnum.valueOf(status));
+        return todoService.updateStatus(id, TodoStatusEnum.valueOf(status));
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.PUT, path = "/update")
-    public ToDo updateEntity(@RequestBody ToDo newItem) {
-        return service.updateEntity(newItem);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.PUT, path = "/delete/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @RequestMapping(method = RequestMethod.DELETE, path = "/delete/{id}")
     public void deleteToDo(@PathVariable long id) {
-        service.deleteToDoById(id);
+        todoService.deleteToDoById(id);
     }
 
 }

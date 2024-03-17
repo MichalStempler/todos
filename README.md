@@ -1,6 +1,5 @@
 ## ToDos Web Application
 This application will help you manage all your todo items.
-The application uses caching for improved preformance.
 
 ### Requirements
 
@@ -12,41 +11,31 @@ For building and running the application you need:
 - [Postman](https://www.postman.com/) (not a must)
 
 ### Running application locally using docker-compose
-1. Clone the project from gitHub
+1. Clone project from gitHub
 2. Build project using 'mvn install'
 3. Open terminal from the main project directory (where docker files are located)
 4. Run 'docker-compose up'
 5. Run supported api calls:
-### create
-    http://localhost:8080/todos-api/create
-#### body example
+### Create
+    http://localhost:8080/todos/create
+##### body
     {"title":"workout","description":"go to pilates"}
-### create-list
-    http://localhost:8080/todos-api/create-list
-#### body example
-   [
-    {
-    "title":"workout",
-    "description":"go to pilates"
-    },
-    {
-    "title":"laundry",
-    "description":"wash the kids pile"
-    },
-    {
-    "title":"relax",
-    "description":"go to pilates"
-    }
-]
-### get-all
-    http://localhost:8080/todos-api/all
-### get-by-id
-    http://localhost:8080/todos-api/id/{id}
-### update-status
-    http://localhost:8080/todos-api/update/status/{id}/{status}
-### update-entity (overrides the entity with same id)
-    http://localhost:8080/todos-api/update
-#### body example
-    {"id":1,"title":"workout","description":"go to pilates","createdTime":"2024-03-16T06:06:26.525725","status":"DONE"}
-### delete
-    http://localhost:8080/todos-api/delete/{id}
+### Create list
+    http://localhost:8080/todos/create-list
+##### body
+    [{"title":"workout","description":"go to pilates"},{"title":"laundry","description":"wash the kids pile"},{"title":"relax","description":"go to pilates"}]
+### Get all
+    http://localhost:8080/todos/
+### Get by id
+    http://localhost:8080/todos/{id}
+### Update-status
+    http://localhost:8080/todos/update/status/{id}/{status}
+### Delete
+    http://localhost:8080/todos/delete/{id}
+
+### Clarifications
+1. The status is set to TODO for each newly created item
+2. Time and date are set at creation
+3. Title and description of todo item cannot be null
+4. Todo status can be TODO, IN_PROCESS or DONE
+5. The todo items are cached when retrieved, additional properties can be added to define caching size, cleanup and expiration.

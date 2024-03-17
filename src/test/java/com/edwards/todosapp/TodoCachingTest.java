@@ -3,6 +3,7 @@ package com.edwards.todosapp;
 import com.edwards.todosapp.model.ToDo;
 import com.edwards.todosapp.model.TodoStatusEnum;
 import com.edwards.todosapp.service.TodoService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TodosAppApplication.class)
-public class ToDoRepositoryIntegrationTest {
+public class TodoCachingTest {
 
     @Autowired
     CacheManager cacheManager;
@@ -43,6 +44,10 @@ public class ToDoRepositoryIntegrationTest {
                 .createdTime(LocalDateTime.of(2024,03,13,17,15,03))
                 .status(TodoStatusEnum.TODO)
                 .build());
+    }
+
+    @AfterEach
+    void tearDown() {
     }
 
     private Optional<ToDo> getCachedToDoItem(long id) {

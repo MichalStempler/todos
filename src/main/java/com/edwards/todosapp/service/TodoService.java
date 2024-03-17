@@ -14,34 +14,35 @@ import java.util.List;
 @Service
 @Slf4j
 public class TodoService {
+
     @Autowired
-    private TodoRepository repository;
+    private TodoRepository todoRepository;
 
     public ToDo save(ToDo newItem) {
-        return repository.save(newItem);
+        return todoRepository.save(newItem);
     }
 
     public List<ToDo> saveList(List<ToDo> newItems) {
-        return repository.saveAll(newItems);
+        return todoRepository.saveAll(newItems);
     }
 
+    /**
+     *
+     * Depending on traffic, caches can grow quite large, quite fast.
+     * Adding @CacheEvict for specific items or limit cache expiration/size in application properties
+     */
     @Cacheable("todos")
     public List<ToDo> getAllToDos() {
-        return repository.findAll();
+        return todoRepository.findAll();
     }
 
     @Cacheable("todos")
     public ToDo findToDoById(long id) throws InvalidIdException {
-        return repository.findById(id).orElseThrow(InvalidIdException::new);
+        return todoRepository.findById(id).orElseThrow(InvalidIdException::new);
     }
 
     public void deleteToDoById(long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-        } else {
-            log.error("Id is not valid, try something else.");
-            throw new InvalidIdException();
-        }
+        todoRepository.deleteById(id);
     }
 
     public ToDo updateStatus(long id, TodoStatusEnum statusEnum) {
@@ -49,11 +50,6 @@ public class TodoService {
         currentItem.setStatus(statusEnum);
 
         log.debug("Status for item:{} is updated to {}", id, statusEnum);
-        return repository.save(currentItem);
-    }
-
-    public ToDo updateEntity(ToDo newItem) {
-        log.debug("Item with id:{} is updated.", newItem.getId());
-        return repository.save(newItem);
+        return todoRepository.save(currentItem);
     }
 }

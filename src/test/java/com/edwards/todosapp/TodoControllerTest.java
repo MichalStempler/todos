@@ -5,6 +5,7 @@ import com.edwards.todosapp.error.InvalidIdException;
 import com.edwards.todosapp.model.ToDo;
 import com.edwards.todosapp.model.TodoStatusEnum;
 import com.edwards.todosapp.service.TodoService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -29,33 +29,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ToDoControllerTest {
+public class TodoControllerTest {
 
-    private static String jsonAllToDos = "[{\"id\":1,\"title\":\"workout\",\"description\":\"go to pilates\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"},{\"id\":2,\"title\":\"laundry\",\"description\":\"wash the kids pile\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"},{\"id\":3,\"title\":\"relax\",\"description\":\"watch a good netflix show\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"}]";
-    private static String jsonUpdateStatus = "{\"id\":2,\"title\":\"laundry\",\"description\":\"wash the kids pile\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"IN_PROCESS\"}";
-    private static String jsonFirstToDo = "{\"id\":1,\"title\":\"workout\",\"description\":\"go to pilates\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"}";
-
+    private static final String jsonAllToDos = "[{\"id\":1,\"title\":\"workout\",\"description\":\"go to pilates\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"},{\"id\":2,\"title\":\"laundry\",\"description\":\"wash the kids pile\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"},{\"id\":3,\"title\":\"relax\",\"description\":\"watch a good netflix show\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"}]";
+    private static final String jsonUpdateStatus = "{\"id\":2,\"title\":\"laundry\",\"description\":\"wash the kids pile\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"IN_PROCESS\"}";
+    private static final String jsonFirstToDo = "{\"id\":1,\"title\":\"workout\",\"description\":\"go to pilates\",\"createdTime\":\"2024-03-13T17:15:03\",\"status\":\"TODO\"}";
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private TodoService toDoService;
+    private TodoService todoService;
 
     @BeforeEach
     void setUp() throws InvalidIdException {
         List<ToDo> todos = createTestData();
-        when(toDoService.save(any())).thenReturn(todos.stream().findFirst().get());
-        when(toDoService.getAllToDos()).thenReturn(todos);
-        when(toDoService.findToDoById(anyLong())).thenReturn(todos.stream().filter(t -> t.getId()==1).findAny().orElse(null));
-        when(toDoService.updateStatus(2, TodoStatusEnum.IN_PROCESS)).thenReturn(updatedEntity());
-        when(toDoService.updateEntity(any())).thenReturn(updatedEntity());
+        when(todoService.save(any())).thenReturn(todos.stream().findFirst().get());
+        when(todoService.getAllToDos()).thenReturn(todos);
+        when(todoService.findToDoById(anyLong())).thenReturn(todos.stream().filter(t -> t.getId()==1).findAny().orElse(null));
+        when(todoService.updateStatus(2, TodoStatusEnum.IN_PROCESS)).thenReturn(updatedEntity());
 
+    }
+
+    @AfterEach
+    void tearDown() {
     }
 
     @Test
     public void createToDoTest() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/todos-api/create")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/todos/create")
                         .content(jsonFirstToDo)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -68,7 +70,7 @@ public class ToDoControllerTest {
 
     @Test
     public void getAllToDosTest() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/todos-api/all"))
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/todos/"))
                 .andExpect(MockMvcResultMatchers.content().string(jsonAllToDos))
                 .andReturn();
 
@@ -78,7 +80,7 @@ public class ToDoControllerTest {
 
     @Test
     public void geToDoByIdTest() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/todos-api/id/1"))
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/todos/1"))
                 .andExpect(MockMvcResultMatchers.content().string(jsonFirstToDo))
                 .andReturn();
 
@@ -88,28 +90,15 @@ public class ToDoControllerTest {
 
     @Test
     public void deleteToDoTest() throws Exception {
-      mockMvc.perform(MockMvcRequestBuilders.put("/todos-api/delete/1")
+      mockMvc.perform(MockMvcRequestBuilders.delete("/todos/delete/1")
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isAccepted())
                 .andReturn();
-    }
-
-    @Test
-    public void updateEntity() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/todos-api/update")
-                        .content(jsonUpdateStatus)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().string(jsonUpdateStatus))
-                .andReturn();
-
-        assertNotNull(result);
-        assertEquals(jsonUpdateStatus, result.getResponse().getContentAsString());
     }
 
     @Test
     public void updateStatus() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/todos-api/update/status/2/IN_PROCESS"))
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/todos/update/status/2/IN_PROCESS"))
                 .andExpect(MockMvcResultMatchers.content().string(jsonUpdateStatus))
                 .andReturn();
 
